@@ -10,13 +10,7 @@ public class Main {
         server.addHandler("GET", "/messages", new Handler() {
             public void handle(Request request, BufferedOutputStream responseStream) {
                 try {
-                    responseStream.write((
-                            "HTTP/1.1 404 Not Found\r\n" +
-                                    "Content-Length: 0\r\n" +
-                                    "Connection: close\r\n" +
-                                    "\r\n"
-                    ).getBytes());
-                    responseStream.flush();
+                    server.responseBadRequest(responseStream);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -34,7 +28,7 @@ public class Main {
         server.addHandler("GET", "/", new Handler() {
             public void handle(Request request, BufferedOutputStream responseStream) {
                 try {
-                    server.responseDefault(responseStream, "/index.html");
+                    server.responseDefault(responseStream, "/spring.svg");
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

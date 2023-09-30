@@ -20,7 +20,7 @@ public class Server {
     final List<String> validPaths = List.of("/index.html", "/spring.svg", "/spring.png", "/resources.html", "/styles.css",
             "/app.js", "/links.html", "/forms.html", "/classic.html", "/events.html", "/events.js");
     ExecutorService executorService;
-    ConcurrentHashMap<Map<String, String>, Handler> handlers;
+    ConcurrentHashMap<String, Map<String, Handler>> handlers;
 
     public Server(int poolSize) {
         this.executorService = Executors.newFixedThreadPool(poolSize);
@@ -56,13 +56,19 @@ public class Server {
             final var path = parts[1];
             final var method = parts[0];
             Request request = new Request(method, path);
-            if (handlers.containsKey(request.requestHandler())) {
-                Handler handler = handlers.get(request.requestHandler());
-                handler.handle(request, out);
+            if (!handlers.containsKey(request.getMethod())) {
+                responseBadRequest(out);
                 return;
             }
 
-            responseDefault(out, path);
+            Map<String, Handler> pathHandler = handlers.get(request.getMethod());
+            final var requestPath = request.getPath();
+            if (pathHandler.containsKey(requestPath)) {
+                Handler handler = pathHandler.get(requestPath);
+                handler.handle(request, out);
+            } else {
+                responseDefault(out, path);
+            }
 
         } catch (IOException e) {
             executorService.shutdown();
@@ -70,9 +76,10 @@ public class Server {
     }
 
     void addHandler(String method, String path, Handler handler) {
-        Map<String, String> putted = new HashMap<>();
-        putted.put(method, path);
-        handlers.put(putted, handler);
+        if (!handlers.containsKey(method)) {
+            handlers.put(method, new HashMap<>());
+        }
+        handlers.get(method).put(path, handler);
     }
 
     void responseBadRequest(BufferedOutputStream out) throws IOException {
