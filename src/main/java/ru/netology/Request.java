@@ -1,16 +1,24 @@
 package ru.netology;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+
+import java.nio.charset.Charset;
+import java.util.List;
 
 public class Request {
 
     private final String method;
     private final String path;
+    private String params = null;
 
     public Request(String method, String path) {
         this.method = method;
-        this.path = path;
+        var parts = path.split("\\?");
+        this.path = parts[0];
+        if (parts.length == 2) {
+            this.params = parts[1];
+        }
     }
 
     public String getMethod() {
@@ -21,9 +29,15 @@ public class Request {
         return path;
     }
 
-    public Map<String, String> requestHandler() {
-        Map<String, String> map = new HashMap<>();
-        map.put(method, path);
-        return map;
+    public NameValuePair getQueryParam(String name) {
+        var params = getQueryParams();
+        for (NameValuePair pair:params) {
+            if (pair.getName().equals(name)) return pair;
+        }
+        return null;
+    }
+
+    public List<NameValuePair> getQueryParams() {
+        return URLEncodedUtils.parse(params, Charset.defaultCharset());
     }
 }
