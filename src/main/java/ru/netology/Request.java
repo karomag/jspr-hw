@@ -10,14 +10,14 @@ public class Request {
 
     private final String method;
     private final String path;
-    private String params = null;
+    private List<NameValuePair> params;
 
     public Request(String method, String path) {
         this.method = method;
         var parts = path.split("\\?");
         this.path = parts[0];
         if (parts.length == 2) {
-            this.params = parts[1];
+            this.params = URLEncodedUtils.parse(parts[1], Charset.defaultCharset());
         }
     }
 
@@ -38,6 +38,6 @@ public class Request {
     }
 
     public List<NameValuePair> getQueryParams() {
-        return URLEncodedUtils.parse(params, Charset.defaultCharset());
+        return params;
     }
 }
