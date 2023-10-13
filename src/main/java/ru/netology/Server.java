@@ -56,6 +56,7 @@ public class Server {
             final var path = parts[1];
             final var method = parts[0];
             Request request = new Request(method, path);
+            var params = request.getQueryParams();
             if (!handlers.containsKey(request.getMethod())) {
                 responseBadRequest(out);
                 return;
